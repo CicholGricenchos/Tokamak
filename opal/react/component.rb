@@ -4,6 +4,7 @@ module React
 
     class << self
       attr_reader :initial_state
+      attr_accessor :__path
 
       def to_n
         @__class ||= `
@@ -51,7 +52,7 @@ module React
       end
 
       def template_path
-        @template_path ||= self.name.gsub(/Component/, '').downcase
+        @template_path ||= __path
       end
     end
 
@@ -76,13 +77,20 @@ module React
     end
 
     def render component_path, props, children_proc = nil
-      component = Module.const_get(component_path.capitalize + 'Component')
+      component = Tokamak::COMPONENTS[component_path]
+      raise "cannot find component by #{component_path}" unless component
       if children_proc
         children = __scope &children_proc
       else
         children = []
       end
       React.create_element(component, props, children)
+    end
+
+    def self.inherited base
+      path = base.name.gsub('::', '/').gsub(/([a-z])([A-Z])/, '\1_\2').downcase
+      Tokamak::COMPONENTS[path] = base
+      base.__path = path
     end
 
     def component_did_mount

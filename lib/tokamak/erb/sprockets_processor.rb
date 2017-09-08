@@ -5,7 +5,7 @@ module Tokamak
 
       def evaluate(context, locals, &block)
         @data = Tokamak::Erb::Compiler.new(@data).process
-        @data = wrap @data, context.logical_path.sub(/^views\//, '')
+        @data = wrap @data, context.logical_path.sub(/^templates\//, '')
         super
       end
 
