@@ -30,16 +30,16 @@ module Tokamak
       def process_node node, root = false
         result = []
         if node.children?
-          result << (root ? "" : "__ << ") + "React.create_element('#{node.name}', #{process_attributes node.attributes}, "
-          result << "[].tap{|__|"
+          result << (root ? "" : "__push ") + "React.create_element('#{node.name}', #{process_attributes node.attributes}, "
+          result << "__scope{"
           node.children.reject(&:empty?).each do |child|
             case child.name
             when 'text'
-              result << "__ << '#{child.content}'\n"
+              result << "__push '#{child.content}'\n"
             when 'ruby-execution'
               result << "#{child.content}\n"
             when 'ruby-expression'
-              result << "__ << #{child.content}\n"
+              result << "__push #{child.content}\n"
             else
               result << (process_node child)
             end
@@ -48,9 +48,9 @@ module Tokamak
         else
           case node.name
           when 'text'
-            result << "__ << '#{node.content}'\n"
+            result << "__push '#{node.content}'\n"
           else
-            result << (root ? "" : "__ << ") + "React.create_element('#{node.name}', #{process_attributes node.attributes})\n"
+            result << (root ? "" : "__push ") + "React.create_element('#{node.name}', #{process_attributes node.attributes})\n"
           end
         end
         result.join

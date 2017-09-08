@@ -7,8 +7,9 @@ Gem::Specification.new do |spec|
   spec.summary       = ''
   spec.description   = ''
 
-  spec.files         = Dir.glob("lib/**/*.rb") + Dir.glob("opal/**/*.rb")
+  spec.files         = Dir.glob("lib/**/*.rb") + Dir.glob("opal/**/*.rb") + %w{bin/tokamak}
   spec.require_paths = ['lib']
+  spec.executables   = ['tokamak']
 
   spec.add_dependency 'opal', '0.11.0.rc1'
   spec.add_dependency 'opal-sprockets', '0.4.1.0.11.0.rc1.3.1.beta2'

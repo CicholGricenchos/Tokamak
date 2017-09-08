@@ -14,7 +14,7 @@ module React
               return #{initial_state.to_n}
             },
             render: function(){
-              return this.__component.$render()
+              return this.__component.$render_component_template()
             },
             componentWillMount: function(){
               return this.__component.$component_will_mount()
@@ -45,12 +45,44 @@ module React
         @initial_state ||= {}
         @initial_state.merge!(hash)
       end
+
+      def template path
+        @template_path = path
+      end
+
+      def template_path
+        @template_path ||= self.name.gsub(/Component/, '').downcase
+      end
     end
 
     def component_will_mount
     end
 
-    def render
+    def render_component_template
+      instance_exec(&Tokamak::TEMPLATES[self.class.template_path])
+    end
+
+    def __scope &block
+      prev_scope = @__current_scope
+      @__current_scope = []
+      instance_exec &block
+      result = @__current_scope
+      @__current_scope = prev_scope
+      result
+    end
+
+    def __push value
+      @__current_scope << value
+    end
+
+    def render component_path, props, children_proc = nil
+      component = Module.const_get(component_path.capitalize + 'Component')
+      if children_proc
+        children = __scope &children_proc
+      else
+        children = []
+      end
+      React.create_element(component, props, children)
     end
 
     def component_did_mount
@@ -84,6 +116,10 @@ module React
 
     def state= hash
       `#{@native}.state = #{hash.to_n}`
+    end
+
+    def props
+      Native(`#{@native}.props`)
     end
   end
 end
